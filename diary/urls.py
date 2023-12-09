@@ -15,7 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from .views import week_schedule
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('schedule/', week_schedule, name='week_schedule'),
 ]
+

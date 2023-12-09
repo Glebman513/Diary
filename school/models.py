@@ -1,46 +1,107 @@
-from datetime import datetime
 from django.db import models
+from datetime import date
+from datetime import datetime
 
-# Create your models here.
+class Person(models.Model):
+    """
+    Абстрактный класс, представляющий человека.
+    """
+    first_name = models.CharField(max_length=200)
+    last_name = models.CharField(max_length=200)
+    middle_name = models.CharField(max_length=200, blank=True)  # Добавляем новое поле
+    birth_date = models.DateField()
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f'{self.first_name} {self.middle_name} {self.last_name}'  # Добавляем отчество в строковое представление
+
+    def age(self):
+        today = date.today()
+        return today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
+
+class Teacher(Person):
+    """
+    Модель, представляющая учителя.
+    """
+    subject = models.ForeignKey('SchoolSubject', on_delete=models.CASCADE)
+
+class Student(Person):
+    """
+    Модель, представляющая ученика.
+    """
+    school_class = models.ForeignKey('SchoolClass', on_delete=models.CASCADE)
+
+class Parent(Person):
+    """
+    Модель, представляющая родителя.
+    """
+    student = models.ForeignKey('Student', on_delete=models.CASCADE)
+
+class School(models.Model):
+    """
+    Модель, представляющая школу.
+    """
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+class SchoolSubject(models.Model):
+    """
+    Модель, представляющая школьный предмет.
+    """
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+class SchoolClass(models.Model):
+    """
+    Модель, представляющая школьный класс.
+    """
+    parallel = models.CharField(max_length=1)
+    start_year=models.IntegerField(default=2023)
+
+    def grade(self):
+        current_year = datetime.now().year
+        if int(datetime.now().strftime("%m")) > 8:
+            return current_year - self.start_year + 5
+        else:
+            return current_year - self.start_year + 4
+    
+    def __str__(self):
+        return f'{self.grade()}{self.parallel}'
+
+class SchoolRoom(models.Model):
+    """
+    Модель, представляющая аудиторию.
+    """
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+class Lesson(models.Model):
+    """
+    Модель, представляющая урок.
+    """
+    subject = models.ForeignKey('SchoolSubject', on_delete=models.CASCADE)
+    teacher = models.ForeignKey('Teacher', on_delete=models.CASCADE)
+    room = models.ForeignKey('SchoolRoom', on_delete=models.CASCADE)
+    date = models.DateField()
+    
+    def __str__(self):
+        return f'{self.subject} ({self.teacher}) {self.date}'
 
 class Grade(models.Model):
-    PARALLEL_NOTATIONS = [
-        ('a', 'А'),
-        ('b', 'Б'),
-        ('v', 'В'),
-        ('g', 'Г'),
-        ]
-    parallel = models.CharField(
-        'параллель',
-        max_length=1,
-        choices=PARALLEL_NOTATIONS
-        )
-    start_year=models.IntegerField(default=2022)
-
-    def calculate_study_year(self):
-        current_year = datetime.now().year
-        return current_year - self.start_year + 4
-
+    """
+    Модель, представляющая оценку на уроке.
+    """
+    value = models.IntegerField()
+    lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE)
+    student = models.ForeignKey('Student', on_delete=models.CASCADE)
+    
     def __str__(self):
-        return f'{self.calculate_study_year()}, {self.parallel}'
-
-
-class Student(models.Model):
-    first_name = models.CharField(
-        'имя',
-        max_length=128
-        )
-    surname = models.CharField(
-        'фамилия',
-        max_length=128
-        )
-    age = models.PositiveIntegerField()
-
-    grade = models.ForeignKey(
-        Grade,
-        on_delete=models.PROTECT,
-        verbose_name='Класс'
-        )
-
-    def __str__(self):
-        return self.surname + ' ' + self.first_name
+        return f'{self.student}: {self.value} ({self.lesson})'
