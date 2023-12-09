@@ -1,0 +1,24 @@
+<!-- week_schedule.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Week Schedule</title>
+</head>
+<body>
+    {% for lesson in lessons %}
+        <h2>{{ lesson.date }} - {{ lesson.name }}</h2>
+        <table>
+            <tr>
+                <th>Grade</th>
+            </tr>
+            {% for grade in grades %}
+                {% if grade.lesson == lesson %}
+                    <tr>
+                        <td>{{ grade.grade }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    {% endfor %}
+</body>
+</html>
