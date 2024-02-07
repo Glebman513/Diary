@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Оценки за период</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 30%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <a href="http://127.0.0.1:8000/schedule/">Вернуться к расписанию</a>
+    <table>
+        <tr>
+            <td>Предмет\Дата</td>
+            <td>Средний балл</td>
+            {% for date in dates %}
+                <td>{{  date  }}</td>
+            {% endfor %}
+        </tr>
+        {% for subj, date_grades in all_grades.items %}
+        <tr>
+            <td>{{  subj.name  }}</td>
+            {% for grades in date_grades %}
+                <td>{{ grades }}</td>
+            {% endfor %}
+
+        </tr>
+        {% endfor %}
+    </table>
+</body>

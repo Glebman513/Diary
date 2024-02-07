@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Расписание на неделю</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 30%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <a href="http://127.0.0.1:8000/term-grades/">Оценки за период<br></a>
+    <a href="http://127.0.0.1:8000/endterm/">Оценки за четверть</a>
+    {% for day, data in schedule.items %}
+    <h2>{{ day }}</h2>
+    <h3>Дата: {{ data.date|date:"d M Y" }}</h3>
+    <table>
+        <tr>
+            <td>{{ data.lesson_one }}</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td>{{ data.lesson_two }}</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td>{{ data.lesson_three }}</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td>{{ data.lesson_four }}</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td>{{ data.lesson_five }}</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td>{{ data.lesson_six }}</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td>{{ data.lesson_seven }}</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td>{{ data.lesson_eight }}</td>
+            <td>1</td>
+        </tr>
+    </table>
+    {% endfor %}
+</body>
+</html>

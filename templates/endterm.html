@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Оценки за период</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 30%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <a href="http://127.0.0.1:8000/schedule/">Вернуться к расписанию</a>
+    <table>
+        {% for subj, term_grades in grades.items %}
+        <tr>
+            <td>{{  subj.name  }}</td>
+            <td>{{  term_grades.grade  }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>

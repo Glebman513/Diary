@@ -1,4 +1,5 @@
 from django.db import models
+from django import forms
 from datetime import date
 from datetime import datetime
 
@@ -99,9 +100,64 @@ class Grade(models.Model):
     """
     Модель, представляющая оценку на уроке.
     """
-    value = models.IntegerField()
+    grade = models.IntegerField()
     lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE)
     student = models.ForeignKey('Student', on_delete=models.CASCADE)
     
     def __str__(self):
-        return f'{self.student}: {self.value} ({self.lesson})'
+        return f'{self.student}: {self.grade} ({self.lesson})'
+
+class DayGrades(models.Model):
+    date = models.DateField()
+    grade = models.IntegerField()
+    subject = models.ForeignKey('SchoolSubject', on_delete=models.CASCADE)
+    student = models.ForeignKey('Student', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.date} {self.grade} {self.subject}'
+
+class Quarter(models.Model):
+    number = models.CharField(max_length=1)
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+    def __str__(self):
+        return f'{self.number}'
+
+class TermGrade(models.Model):
+    year = models.IntegerField()
+    term = models.ForeignKey('Quarter', on_delete=models.CASCADE)
+    grade = models.IntegerField()
+    subject = models.ForeignKey('SchoolSubject', on_delete=models.CASCADE)
+    student = models.ForeignKey('Student', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.year} {self.term} {self.subject} {self.student}'
+
+class DaySchedule(models.Model):
+    schoolclass = models.ForeignKey('SchoolClass', on_delete=models.CASCADE)
+    date = models.DateField()
+    day_of_week = models.CharField(
+        max_length = 16,
+        choices = [
+            ('Monday', 'Понедельник'),
+            ('Tuesday', 'Вторник'),
+            ('Wednesday', 'Среда'),
+            ('Thursday', 'Четверг'),
+            ('Friday', 'Пятница'),
+            ('Saturday', 'Суббота'),
+            ('Sunday', 'Воскресенье'),
+            ]
+            )
+    lesson_one = models.ForeignKey('SchoolSubject', related_name="lesson1", on_delete=models.CASCADE, blank=True, default='-')
+    lesson_two = models.ForeignKey('SchoolSubject', related_name="lesson2", on_delete=models.CASCADE, blank=True, default='-')
+    lesson_three = models.ForeignKey('SchoolSubject', related_name="lesson3", on_delete=models.CASCADE, blank=True, default='-')
+    lesson_four = models.ForeignKey('SchoolSubject', related_name="lesson4", on_delete=models.CASCADE, blank=True, default='-')
+    lesson_five = models.ForeignKey('SchoolSubject', related_name="lesson5", on_delete=models.CASCADE, blank=True, default='-')
+    lesson_six = models.ForeignKey('SchoolSubject', related_name="lesson6", on_delete=models.CASCADE, blank=True, default='-')
+    lesson_seven = models.ForeignKey('SchoolSubject', related_name="lesson7", on_delete=models.CASCADE, blank=True, default='-')
+    lesson_eight = models.ForeignKey('SchoolSubject', related_name="lesson8", on_delete=models.CASCADE, blank=True, default='-')
+
+    def __str__(self):
+        return f'{self.schoolclass} {self.day_of_week}'
+
