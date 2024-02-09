@@ -2,11 +2,21 @@ from django.db import models
 from django import forms
 from datetime import date
 from datetime import datetime
+from django.contrib.auth.models import User
+
 
 class Person(models.Model):
     """
     Абстрактный класс, представляющий человека.
     """
+    user=models.OneToOneField(
+        User,
+        verbose_name='Пользователь',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+        )
+    username=models.CharField(max_length=200)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     middle_name = models.CharField(max_length=200, blank=True)  # Добавляем новое поле
@@ -16,7 +26,7 @@ class Person(models.Model):
         abstract = True
 
     def __str__(self):
-        return f'{self.first_name} {self.middle_name} {self.last_name}'  # Добавляем отчество в строковое представление
+        return f'{self.first_name} {self.last_name} ({self.username})'  # Добавляем отчество в строковое представление
 
     def age(self):
         today = date.today()
@@ -136,7 +146,6 @@ class TermGrade(models.Model):
 
 class DaySchedule(models.Model):
     schoolclass = models.ForeignKey('SchoolClass', on_delete=models.CASCADE)
-    date = models.DateField()
     day_of_week = models.CharField(
         max_length = 16,
         choices = [
@@ -149,14 +158,14 @@ class DaySchedule(models.Model):
             ('Sunday', 'Воскресенье'),
             ]
             )
-    lesson_one = models.ForeignKey('SchoolSubject', related_name="lesson1", on_delete=models.CASCADE, blank=True, default='-')
-    lesson_two = models.ForeignKey('SchoolSubject', related_name="lesson2", on_delete=models.CASCADE, blank=True, default='-')
-    lesson_three = models.ForeignKey('SchoolSubject', related_name="lesson3", on_delete=models.CASCADE, blank=True, default='-')
-    lesson_four = models.ForeignKey('SchoolSubject', related_name="lesson4", on_delete=models.CASCADE, blank=True, default='-')
-    lesson_five = models.ForeignKey('SchoolSubject', related_name="lesson5", on_delete=models.CASCADE, blank=True, default='-')
-    lesson_six = models.ForeignKey('SchoolSubject', related_name="lesson6", on_delete=models.CASCADE, blank=True, default='-')
-    lesson_seven = models.ForeignKey('SchoolSubject', related_name="lesson7", on_delete=models.CASCADE, blank=True, default='-')
-    lesson_eight = models.ForeignKey('SchoolSubject', related_name="lesson8", on_delete=models.CASCADE, blank=True, default='-')
+    lesson_one = models.ForeignKey('SchoolSubject', related_name="lesson1", on_delete=models.CASCADE, blank=True, null=True, default=' ') 
+    lesson_two = models.ForeignKey('SchoolSubject', related_name="lesson2", on_delete=models.CASCADE, blank=True, null=True, default=' ') 
+    lesson_three = models.ForeignKey('SchoolSubject', related_name="lesson3", on_delete=models.CASCADE, blank=True, null=True, default=' ')
+    lesson_four = models.ForeignKey('SchoolSubject', related_name="lesson4", on_delete=models.CASCADE, blank=True, null=True, default=' ')
+    lesson_five = models.ForeignKey('SchoolSubject', related_name="lesson5", on_delete=models.CASCADE, blank=True, null=True, default=' ')
+    lesson_six = models.ForeignKey('SchoolSubject', related_name="lesson6", on_delete=models.CASCADE, blank=True, null=True, default=' ')
+    lesson_seven = models.ForeignKey('SchoolSubject', related_name="lesson7", on_delete=models.CASCADE, blank=True, null=True, default=' ')
+    lesson_eight = models.ForeignKey('SchoolSubject', related_name="lesson8", on_delete=models.CASCADE, blank=True, null=True, default=' ')
 
     def __str__(self):
         return f'{self.schoolclass} {self.day_of_week}'

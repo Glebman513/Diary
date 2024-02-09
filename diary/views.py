@@ -1,8 +1,13 @@
 from django.views.generic import ListView
-from school.models import Lesson, Grade, DaySchedule, DayGrades, SchoolSubject, TermGrade, Quarter
+from school.models import Lesson, Grade, DaySchedule, DayGrades, SchoolSubject, TermGrade, Quarter, Student
 from datetime import datetime, timedelta
 from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, models
+from .forms import LoginForm
+from django.http import HttpResponseRedirect
 import pandas
+import statistics
 
 week_days = [
             ('Monday', 'Понедельник'),
@@ -14,14 +19,14 @@ week_days = [
             ('Sunday', 'Воскресенье'),
             ]
 
-def login(request):
-    return 1
+#def login(request):
+ #   return 1
 
 def schedule_view(request):
-    weekdays = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+    user = request.user
+    if not user.is_authenticated:
+        return HttpResponseRedirect('http://127.0.0.1:8000/accounts/login/')
     schedule = {}
-    grades = []
-    current_week = datetime.now().isocalendar()[1]
     for day in week_days:
         schedule[day[1]] = DaySchedule.objects.filter(day_of_week = day[0]).first()
     context = {
@@ -30,6 +35,9 @@ def schedule_view(request):
     return render(request, 'schedule.html', context)
 
 def term_grades(request):
+    user = request.user
+    if not user.is_authenticated:
+        return HttpResponseRedirect('http://127.0.0.1:8000/accounts/login/')
     subjects = SchoolSubject.objects.all()
     all_grades = {}
     avg_grade = {}
@@ -39,17 +47,14 @@ def term_grades(request):
         min(start_date, end_date),
         max(start_date, end_date)
         ).strftime('%Y-%m-%d').tolist()
-    date_grades = {}
     for i in subjects:
-        all_grades[i] = DayGrades.objects.filter(subject=i)
-        avg_grade[i] = DayGrades.objects.filter(subject=i)
+        all_grades[i] = DayGrades.objects.filter(subject=i, student__user=user)
+        avg_grade[i] = DayGrades.objects.filter(subject=i, student__user=user)
         subj_grades = []
         avg_subj_grades = []
-        average = 0
-        count = 0
         for date in res:
             date_obj = datetime.strptime(date, '%Y-%m-%d').date() 
-            current_grades = list(DayGrades.objects.filter(subject=i, date=date_obj).values_list('grade', flat=True))
+            current_grades = list(DayGrades.objects.filter(subject=i, date=date_obj, student__user=user).values_list('grade', flat=True))
             grades = ' '.join(map(str, current_grades))
             subj_grades.append(
                 grades
@@ -57,19 +62,12 @@ def term_grades(request):
             avg_subj_grades.append(
                 current_grades
             )
-        for j in avg_subj_grades:
-            for n in j:
-                average += int(n)
-        for o in avg_subj_grades:
-            if o:
-                count +=1
         all_grades[i] = subj_grades
-        if count == 0:
+        avg_subj_grades = [item for sublist in avg_subj_grades for item in sublist]
+        if not avg_subj_grades:
             all_grades[i].insert(0, 'Нет оценок')
         else:
-            all_grades[i].insert(0, (average/count))
-        print(average)
-        print(count) 
+            all_grades[i].insert(0, round(statistics.mean(avg_subj_grades), 2))
         print(all_grades)
     context = {
         'avg_grades': avg_grade,
@@ -80,11 +78,24 @@ def term_grades(request):
 
 
 def endterm_grades(request):
+    user = request.user
+    if not user.is_authenticated:
+        return HttpResponseRedirect('http://127.0.0.1:8000/accounts/login/')
     subjects = SchoolSubject.objects.all()
     term_grades = {}
+    quarters = ('1', '2', '3', '4')
     for i in subjects:
-        term_grades[i] = TermGrade.objects.filter(subject=i)
+        term_grades[i] = TermGrade.objects.filter(subject=i, student__user=user)
+        subj_grades = []
+        for quarter in quarters: 
+            current_grades = list(TermGrade.objects.filter(subject=i, term=quarter, student__user=user).values_list('grade', flat=True))
+            grades = ' '.join(map(str, current_grades))
+            subj_grades.append(
+                grades
+            )
+        term_grades[i] = subj_grades
     context = {
-        'grades': term_grades,
+        'term_grades': term_grades,
+        'quarters': quarters 
     }
     return render(request, 'endterm.html', context)
